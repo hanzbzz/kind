@@ -82,7 +82,7 @@ func LoadImageArchive(n nodes.Node, image io.Reader) error {
 	if err != nil {
 		return err
 	}
-	cmd := n.Command("ctr", "--namespace=k8s.io", "images", "import", "--all-platforms", "--digests", "--snapshotter="+snapshotter, "-").SetStdin(image)
+	cmd := n.Command("ctr", "--namespace=k8s.io", "images", "import", "--all-platforms", "--local", "--digests", "--snapshotter="+snapshotter, "-").SetStdin(image)
 	if err := cmd.Run(); err != nil {
 		return errors.Wrap(err, "failed to load image")
 	}
@@ -102,7 +102,8 @@ func parseSnapshotter(config string) (string, error) {
 	if err != nil {
 		return "", errors.Wrap(err, "failed to detect containerd snapshotter")
 	}
-	snapshotter, ok := parsed.GetPath([]string{"plugins", "io.containerd.grpc.v1.cri", "containerd", "snapshotter"}).(string)
+	//snapshotter, ok := parsed.GetPath([]string{"plugins", "io.containerd.grpc.v1.cri", "containerd", "snapshotter"}).(string)
+	snapshotter, ok := parsed.GetPath([]string{"plugins", "io.containerd.cri.v1.images", "snapshotter"}).(string)
 	if !ok {
 		return "", errors.New("failed to detect containerd snapshotter")
 	}
