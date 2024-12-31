@@ -111,7 +111,10 @@ COPY --chmod=0755 scripts/target-cc /usr/local/bin/
 RUN dpkg --add-architecture arm64 && dpkg --add-architecture amd64 \
     && clean-install bash ca-certificates curl git make pkg-config \
     crossbuild-essential-amd64 crossbuild-essential-arm64 \
-    libseccomp-dev:amd64 libseccomp-dev:arm64
+    libseccomp-dev:amd64 libseccomp-dev:arm64 \
+    libprotobuf-dev libprotobuf-c-dev protobuf-c-compiler protobuf-compiler python3-protobuf \
+    pkg-config libbsd-dev iproute2 libnftables-dev libcap-dev libnet1-dev libnl-3-dev \
+    libaio-dev  libgnutls28-dev python3-future libdrm-dev asciidoc xmlto
 # set by makefile to .go-version
 ARG GO_VERSION
 RUN eval "$(gimme "${GO_VERSION}")" \
@@ -122,7 +125,7 @@ RUN eval "$(gimme "${GO_VERSION}")" \
 # stage for building containerd
 FROM go-build AS build-containerd
 ARG TARGETARCH GO_VERSION
-ARG CONTAINERD_VERSION="v1.7.18"
+ARG CONTAINERD_VERSION="v2.0.0"
 ARG CONTAINERD_CLONE_URL="https://github.com/containerd/containerd"
 # we don't build with optional snapshotters, we never select any of these
 # they're not ideal inside kind anyhow, and we save some disk space
@@ -200,9 +203,26 @@ RUN git clone --filter=tree:0 "${CONTAINERD_FUSE_OVERLAYFS_CLONE_URL}" /fuse-ove
     && make bin/containerd-fuse-overlayfs-grpc \
     && GOARCH=$TARGETARCH go-licenses save --save_path=/_LICENSES ./cmd/containerd-fuse-overlayfs-grpc
 
+# stage for building criu
+FROM go-build as build-criu
+ARG TARGETARCH GO_VERSION
+ARG CRIU_VERSION="v3.19"
+ARG CRIU_CLONE_URL="https://github.com/checkpoint-restore/criu.git"
+RUN git clone --filter=tree:0 "${CRIU_CLONE_URL}" /criu \
+    && cd /criu \
+    && git checkout "${CRIU_VERSION}" \
+    && eval "$(gimme "${GO_VERSION}")" \
+    && export GOTOOLCHAIN="go${GO_VERSION}" \
+    && export GOARCH=$TARGETARCH && export CC=$(target-cc) && export CGO_ENABLED=1 \
+    && LIBDIR=/criu-libs make install
 
 # build final image layout from other stages
 FROM base AS build
+# copy over criu build and install
+COPY --from=build-criu /criu-libs/ /usr/local/lib/
+COPY --from=build-criu /usr/local/sbin/criu /usr/local/bin/
+COPY --from=build-criu /usr/local/sbin/criu-ns /usr/local/bin/
+COPY --from=build-criu /usr/lib/x86_64-linux-gnu/ /usr/lib/x86_64-linux-gnu/
 # copy over containerd build and install
 COPY --from=build-containerd /containerd/bin/containerd /usr/local/bin/
 COPY --from=build-containerd /containerd/bin/ctr /usr/local/bin/
