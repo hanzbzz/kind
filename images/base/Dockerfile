@@ -126,7 +126,7 @@ RUN eval "$(gimme "${GO_VERSION}")" \
 FROM go-build AS build-containerd
 ARG TARGETARCH GO_VERSION
 ARG CONTAINERD_VERSION="v2.0.0"
-ARG CONTAINERD_CLONE_URL="https://github.com/containerd/containerd"
+ARG CONTAINERD_CLONE_URL="https://github.com/hanzbzz/containerd"
 # we don't build with optional snapshotters, we never select any of these
 # they're not ideal inside kind anyhow, and we save some disk space
 ARG BUILDTAGS="no_aufs no_zfs no_btrfs no_devmapper"
