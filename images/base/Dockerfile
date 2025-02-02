@@ -206,8 +206,8 @@ RUN git clone --filter=tree:0 "${CONTAINERD_FUSE_OVERLAYFS_CLONE_URL}" /fuse-ove
 # stage for building criu
 FROM go-build as build-criu
 ARG TARGETARCH GO_VERSION
-ARG CRIU_VERSION="v3.19"
-ARG CRIU_CLONE_URL="https://github.com/checkpoint-restore/criu.git"
+ARG CRIU_VERSION="encrypted-images"
+ARG CRIU_CLONE_URL="https://github.com/rst0git/criu.git"
 RUN git clone --filter=tree:0 "${CRIU_CLONE_URL}" /criu \
     && cd /criu \
     && git checkout "${CRIU_VERSION}" \
