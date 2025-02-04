@@ -143,8 +143,8 @@ RUN git clone --filter=tree:0 "${CONTAINERD_CLONE_URL}" /containerd \
 # stage for building runc
 FROM go-build AS build-runc
 ARG TARGETARCH GO_VERSION
-ARG RUNC_VERSION="v1.1.13"
-ARG RUNC_CLONE_URL="https://github.com/opencontainers/runc"
+ARG RUNC_VERSION="release-1.2-brazda"
+ARG RUNC_CLONE_URL="https://github.com/hanzbzz/runc.git"
 RUN git clone --filter=tree:0 "${RUNC_CLONE_URL}" /runc \
     && cd /runc \
     && git checkout "${RUNC_VERSION}" \
@@ -207,7 +207,7 @@ RUN git clone --filter=tree:0 "${CONTAINERD_FUSE_OVERLAYFS_CLONE_URL}" /fuse-ove
 FROM go-build as build-criu
 ARG TARGETARCH GO_VERSION
 ARG CRIU_VERSION="encrypted-images"
-ARG CRIU_CLONE_URL="https://github.com/rst0git/criu.git"
+ARG CRIU_CLONE_URL="https://github.com/hanzbzz/criu.git"
 RUN git clone --filter=tree:0 "${CRIU_CLONE_URL}" /criu \
     && cd /criu \
     && git checkout "${CRIU_VERSION}" \
