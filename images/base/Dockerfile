@@ -125,7 +125,7 @@ RUN eval "$(gimme "${GO_VERSION}")" \
 # stage for building containerd
 FROM go-build AS build-containerd
 ARG TARGETARCH GO_VERSION
-ARG CONTAINERD_VERSION="v2.0.0"
+ARG CONTAINERD_VERSION="release-2.0-brazda"
 ARG CONTAINERD_CLONE_URL="https://github.com/hanzbzz/containerd"
 # we don't build with optional snapshotters, we never select any of these
 # they're not ideal inside kind anyhow, and we save some disk space
@@ -204,7 +204,7 @@ RUN git clone --filter=tree:0 "${CONTAINERD_FUSE_OVERLAYFS_CLONE_URL}" /fuse-ove
     && GOARCH=$TARGETARCH go-licenses save --save_path=/_LICENSES ./cmd/containerd-fuse-overlayfs-grpc
 
 # stage for building criu
-FROM go-build as build-criu
+FROM go-build AS build-criu
 ARG TARGETARCH GO_VERSION
 ARG CRIU_VERSION="encrypted-images"
 ARG CRIU_CLONE_URL="https://github.com/hanzbzz/criu.git"
